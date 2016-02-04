@@ -4,6 +4,7 @@ from social import views
 #randon comments to test Git commits yall
 #spazmatron69 was here.
 #the fuck is bluemist anyway
+#idiotic comments - see above
 urlpatterns = [
 	# main page
     url(r'^$', views.index, name='index'),
