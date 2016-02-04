@@ -5,6 +5,7 @@ from social import views
 #spazmatron69 was here.
 #the fuck is bluemist anyway
 #idiotic comments - see above
+# who is an idiot now?? #trynum2
 urlpatterns = [
 	# main page
     url(r'^$', views.index, name='index'),
