@@ -2,7 +2,7 @@ from django.conf.urls import patterns, url
 
 from social import views
 #randon comments to test Git commits yall
-#spazmatron was here
+#spazmatron69 was here
 urlpatterns = [
 	# main page
     url(r'^$', views.index, name='index'),
