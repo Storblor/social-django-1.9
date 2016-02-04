@@ -3,6 +3,7 @@ from django.conf.urls import patterns, url
 from social import views
 #randon comments to test Git commits yall
 #spazmatron69 was here.
+#the fuck is bluemist anyway
 urlpatterns = [
 	# main page
     url(r'^$', views.index, name='index'),
