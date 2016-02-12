@@ -6,6 +6,13 @@
 {% if profile %}
 {% endif %}
 <br>
+<ul>
+{% for add in add %}
+	<li> <a href="?view={{ add.from_user_id }}"> {{ add.from_user_id }} </a>
+
+			[<a href="?invite={{ add.from_user_id }}">Accept</a>] </li>
+{% endfor %}
+</ul>
 <br>
 </div>
 {% endblock %}
