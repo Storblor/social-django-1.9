@@ -2,15 +2,12 @@
 
 {% block content %}
 <div class='main'>
-<h3> Invites</h3>
-{% if profile %}
-{% endif %}
-<br>
+<h3>Invites</h3>
 <ul>
-{% for add in add %}
-	<li> <a href="?view={{ add.from_user_id }}"> {{ add.from_user_id }} </a>
+{% for invite in invitations %}
+	<li> <a href="?view={{ invite.username }}"> {{ invite.from_user }} </a>
 
-			[<a href="?invite={{ add.from_user_id }}">Accept</a>] </li>
+			[<a href="?invite={{ invite.username }}">Add friend</a>] </li>
 {% endfor %}
 </ul>
 <br>

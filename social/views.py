@@ -166,11 +166,21 @@ def members(request):
             )
 @loggedin
 def invites(request):
-    i = request.session['username']
-    return render(request, 'social/invites.html', {
+    username = request.session['username']
+    # view user profile
+    if 'view' in request.GET:
+        return member(request, request.GET['view'])
+    else:
+        # list of all other members
+        members = Member.objects.exclude(pk=username)
+        # list of people I'm following
+        invitations = Add.objects.filter(to_user=username)
+        # render response
+        return render(request, 'social/invites.html', {
             'appname': appname,
-            'username': i,
-            'invites': invites,
+            'username': username,
+            'invites': members,
+            'invitations': invitations,
             'loggedin': True}
             )
 
