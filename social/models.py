@@ -18,3 +18,14 @@ class Message(models.Model):
     pm = models.BooleanField(default=True)
     time = models.DateTimeField()
     text = models.CharField(max_length=4096)
+
+class Add(models.Model):
+    to_user = models.ForeignKey(Member, related_name='%(class)s_user')
+    from_user = models.ForeignKey(Member, related_name='%(class)s_recip')
+    status = models.CharField(max_length=10)
+
+
+
+
+
+

@@ -20,6 +20,8 @@ urlpatterns = [
     url(r'^logout/$', views.logout, name='logout'),
     # members page
     url(r'^members/$', views.members, name='members'),
+    #invites page
+    url(r'^invites/$', views.invites, name='invites'),
     # friends page
     url(r'^friends/$', views.friends, name='friends'),
     # user profile edit page

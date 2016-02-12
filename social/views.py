@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.http import HttpResponse, Http404
 from django.template import RequestContext, loader
-from social.models import Member, Profile, Message
+from social.models import Member, Profile, Message, Add
 
 appname = 'Facemagazine'
 
@@ -127,6 +127,13 @@ def members(request):
     username = request.session['username']
     member_obj = Member.objects.get(pk=username)
     # follow new friend
+    if 'invite' in request.GET:
+        friend = request.GET['invite']
+        friend_obj = Member.objects.get(pk=friend)
+        member_obj.following.add(friend_obj)
+        what = Add(to_user=friend_obj, from_user=member_obj, status="pending")
+        #Add.objects.create(to_user=friend_obj, from_user=member_obj, status="pending")
+        what.save()
     if 'add' in request.GET:
         friend = request.GET['add']
         friend_obj = Member.objects.get(pk=friend)
@@ -155,6 +162,15 @@ def members(request):
             'members': members,
             'following': following,
             'followers': followers,
+            'loggedin': True}
+            )
+@loggedin
+def invites(request):
+    i = request.session['username']
+    return render(request, 'social/invites.html', {
+            'appname': appname,
+            'username': i,
+            'invites': invites,
             'loggedin': True}
             )
 

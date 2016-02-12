@@ -2,23 +2,12 @@
 
 {% block content %}
 <div class='main'>
-<h3>Other Members</h3>
+<h3>ether Members</h3>
 <ul>
 {% for member in members %}
 	<li> <a href="?view={{ member.username }}"> {{ member.username }} </a>
-	{% if member in following %}
-		{% if member in followers %}
-			&harr; is a mutual friend [<a href="?remove={{ member.username }}">Unfriend</a>] </li>
-		{% else %}
-			&larr; you are following [<a href="?remove={{ member.username }}">Unfriend</a>] </li>
-		{% endif %}
-	{% else %}
-		{% if member in followers %}
-			&rarr; is following you [<a href="?add={{ member.username }}">recip</a>] </li>
-		{% else %}
-			[<a href="?add={{ member.username }}">Add friend</a>] </li>
-		{% endif %}
-	{% endif %}
+
+			[<a href="?invite={{ member.username }}">Add friend</a>] </li>
 {% endfor %}
 </ul>
 <br>
