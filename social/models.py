@@ -7,7 +7,7 @@ class Member(models.Model):
     username = models.CharField(max_length=16,primary_key=True)
     password = models.CharField(max_length=16)
     profile = models.OneToOneField(Profile, null=True)
-    following = models.ManyToManyField("self", symmetrical=False)
+    following = models.ManyToManyField("self", symmetrical=True)
 
     def __str__(self):
         return self.username
