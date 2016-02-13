@@ -19,9 +19,10 @@ class Message(models.Model):
     time = models.DateTimeField()
     text = models.CharField(max_length=4096)
 
-class Add(models.Model):
-    to_user = models.ForeignKey(Member, related_name='%(class)s_user')
-    from_user = models.ForeignKey(Member, related_name='%(class)s_recip')
+class Invitation(models.Model):
+    to_user = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='%(class)s_user')
+    from_user = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='%(class)s_recip')
+    timestamp = models.DateTimeField()
     status = models.CharField(max_length=10)
 
 

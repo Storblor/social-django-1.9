@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.http import HttpResponse, Http404
 from django.template import RequestContext, loader
-from social.models import Member, Profile, Message, Add
+from social.models import Member, Profile, Message, Invitation
 
 appname = 'Facemagazine'
 
@@ -72,11 +72,17 @@ def login(request):
 def friends(request):
     username = request.session['username']
     member_obj = Member.objects.get(pk=username)
+    if 'unfriend' in request.GET:
+        friend = request.GET['unfriend']
+        friend_obj = Member.objects.get(pk=friend)
+        print("is this being called")
+        member_obj.following.remove(friend_obj)
+        member_obj.save()
     # list of people I'm following
     following = member_obj.following.all()
     # list of people that are following me
     followers = Member.objects.filter(following__username=username)
-    # render reponse
+    # render response
     return render(request, 'social/friends.html', {
         'appname': appname,
         'username': username,
@@ -126,25 +132,28 @@ def member(request, view_user):
 def members(request):
     username = request.session['username']
     member_obj = Member.objects.get(pk=username)
-    # follow new friend
+    # send a friend request
     if 'invite' in request.GET:
         friend = request.GET['invite']
         friend_obj = Member.objects.get(pk=friend)
-        member_obj.following.add(friend_obj)
-        what = Add(to_user=friend_obj, from_user=member_obj, status="pending")
-        #Add.objects.create(to_user=friend_obj, from_user=member_obj, status="pending")
-        what.save()
-    if 'add' in request.GET:
-        friend = request.GET['add']
-        friend_obj = Member.objects.get(pk=friend)
-        member_obj.following.add(friend_obj)
-        member_obj.save()
-    # unfollow a friend
-    if 'remove' in request.GET:
-        friend = request.GET['remove']
-        friend_obj = Member.objects.get(pk=friend)
-        member_obj.following.remove(friend_obj)
-        member_obj.save()
+        friend_objs = member_obj.following.all()
+       # hello=friend_objs.filter(following=friend)
+       # print(friend_obj)
+       # print(friend_objs)
+       # print(member_obj)
+       # print(hello)
+        # If they are already friends
+        if Member.objects.filter(username=username, following=friend).exists():
+            print("These users are already friends!")
+        # if an invitation already exists simply update the invitation with the latest timestamp
+        elif Invitation.objects.filter(to_user=friend, from_user=username).exists():
+            print("not friends yet so simply update the request timestamp")
+            Invitation.objects.update(timestamp=timezone.now())
+        # Not friends and no invitation exists
+        else:
+            print("not friends and no invitation exists")
+            invitation_obj = Invitation(to_user=friend_obj, from_user=member_obj, timestamp=timezone.now(), status="pending")
+            invitation_obj.save()
     # view user profile
     if 'view' in request.GET:
         return member(request, request.GET['view'])
@@ -167,6 +176,18 @@ def members(request):
 @loggedin
 def invites(request):
     username = request.session['username']
+    member_obj = Member.objects.get(pk=username)
+    # accept friend request
+    if 'accept' in request.GET:
+        friend = request.GET['accept']
+        friend_obj = Member.objects.get(pk=friend)
+        member_obj.following.add(friend_obj)
+        member_obj.save()
+        Invitation.objects.filter(to_user=member_obj, from_user=friend).delete()
+    # decline friend invitation
+    if 'decline' in request.GET:
+        friend = request.GET['decline']
+        Invitation.objects.filter(to_user=member_obj, from_user=friend).delete()
     # view user profile
     if 'view' in request.GET:
         return member(request, request.GET['view'])
@@ -174,7 +195,7 @@ def invites(request):
         # list of all other members
         members = Member.objects.exclude(pk=username)
         # list of people I'm following
-        invitations = Add.objects.filter(to_user=username)
+        invitations = Invitation.objects.filter(to_user=username)
         # render response
         return render(request, 'social/invites.html', {
             'appname': appname,

@@ -7,7 +7,7 @@
 {% for invite in invitations %}
 	<li> <a href="?view={{ invite.username }}"> {{ invite.from_user }} </a>
 
-			[<a href="?invite={{ invite.username }}">Add friend</a>] </li>
+			[<a href="?accept={{ invite.from_user }}">Accept</a>] [<a href="?decline={{ invite.from_user }}">Decline</a>]  </li>
 {% endfor %}
 </ul>
 <br>
