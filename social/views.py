@@ -75,13 +75,14 @@ def friends(request):
     if 'unfriend' in request.GET:
         friend = request.GET['unfriend']
         friend_obj = Member.objects.get(pk=friend)
-        print("is this being called")
         member_obj.following.remove(friend_obj)
         member_obj.save()
     # list of people I'm following
     following = member_obj.following.all()
     # list of people that are following me
     followers = Member.objects.filter(following__username=username)
+    print(following)
+    print(followers)
     # render response
     return render(request, 'social/friends.html', {
         'appname': appname,
@@ -109,7 +110,7 @@ def logout(request):
 def member(request, view_user):
     username = request.session['username']
     member = Member.objects.get(pk=view_user)
-
+    print(member)
     if view_user == username:
         greeting = "Your"
     else:
@@ -136,24 +137,21 @@ def members(request):
     if 'invite' in request.GET:
         friend = request.GET['invite']
         friend_obj = Member.objects.get(pk=friend)
-        friend_objs = member_obj.following.all()
-       # hello=friend_objs.filter(following=friend)
-       # print(friend_obj)
-       # print(friend_objs)
-       # print(member_obj)
-       # print(hello)
         # If they are already friends
         if Member.objects.filter(username=username, following=friend).exists():
-            print("These users are already friends!")
-        # if an invitation already exists simply update the invitation with the latest timestamp
-        elif Invitation.objects.filter(to_user=friend, from_user=username).exists():
-            print("not friends yet so simply update the request timestamp")
-            Invitation.objects.update(timestamp=timezone.now())
+            pass # do nothing as they are already friends
+        # If invitee has already sent a request to the user, make them friends
+        elif Invitation.objects.filter(to_user=username, from_user=friend).exists():
+            member_obj.following.add(friend_obj)
+            member_obj.save()
+            Invitation.objects.filter(to_user=member_obj, from_user=friend).delete()
         # Not friends and no invitation exists
         else:
-            print("not friends and no invitation exists")
-            invitation_obj = Invitation(to_user=friend_obj, from_user=member_obj, timestamp=timezone.now(), status="pending")
-            invitation_obj.save()
+            print("not friends and invitation may or may not have already been sent")
+            print(friend)
+            print(friend_obj)#interesting to note that while the two print statement will display the same thing
+                            # only friend_obj can be passed to the database as its required to be an instance
+            Invitation.objects.update_or_create(to_user=friend_obj, from_user=member_obj, status='pending', defaults={'timestamp':timezone.now()})
     # view user profile
     if 'view' in request.GET:
         return member(request, request.GET['view'])
@@ -164,7 +162,7 @@ def members(request):
         following = member_obj.following.all()
         # list of people that are following me
         followers = Member.objects.filter(following__username=username)
-        # render reponse
+        # render response
         return render(request, 'social/members.html', {
             'appname': appname,
             'username': username,
@@ -177,6 +175,10 @@ def members(request):
 def invites(request):
     username = request.session['username']
     member_obj = Member.objects.get(pk=username)
+    # cancel friend request
+    if 'cancel' in request.GET:
+        friend = request.GET['cancel']
+        Invitation.objects.filter(to_user=friend, from_user=username).delete()
     # accept friend request
     if 'accept' in request.GET:
         friend = request.GET['accept']
@@ -196,11 +198,14 @@ def invites(request):
         members = Member.objects.exclude(pk=username)
         # list of people I'm following
         invitations = Invitation.objects.filter(to_user=username)
+        # get all invitations user has sent
+        sents = Invitation.objects.filter(from_user=username) #edited
         # render response
         return render(request, 'social/invites.html', {
             'appname': appname,
             'username': username,
             'invites': members,
+            'sents': sents, #edited
             'invitations': invitations,
             'loggedin': True}
             )
