@@ -13,6 +13,15 @@
         [<a href="/social/friends/?unfriend={{ member.username }}">remove</a>]
 	{% endfor %}
 	</ul>
+
+    	<h3>Recommended Friends</h3>
+	<ul>
+	{% for member in recommended %}
+		<li> <a href="/social/members/?view={{ member.username }}"> {{ member.username }} </a>
+        [<a href="?invite={{ member.username }}">Add friend</a>] </li>
+
+	{% endfor %}
+	</ul>
 {% endif %}
 <br>
 </div>

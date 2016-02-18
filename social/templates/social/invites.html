@@ -2,7 +2,17 @@
 
 {% block content %}
 <div class='main'>
-<h3>Invites</h3>
+<h3>Sent</h3>
+<ul>
+    {% for sent in sents %}
+        <li> <a href="?view={{ sent.to_user }}"> {{ sent.to_user }} </a>
+
+	            [<a href="?cancel={{ sent.to_user }}">Cancel</a>]</li>
+{% endfor %}
+</ul>
+<br>
+<br>
+<h3>Received</h3>
 <ul>
 {% for invite in invitations %}
 	<li> <a href="?view={{ invite.username }}"> {{ invite.from_user }} </a>
