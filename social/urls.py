@@ -16,6 +16,12 @@ urlpatterns = [
 	url(r'^register/$', views.register, name='register'),
     # login page
     url(r'^login/$', views.login, name='login'),
+    # user doesnt exist webpage
+    url(r'^user-doesnt-exist/$', views.login, name='user-doesnt-exist'),
+    #page to show that the password is incorrect
+    url(r'^wrongpass/$', views.login, name='wrongpass'),
+    #webpage to show an error when a user tries to input nothing in the fiels when signing up
+    url(r'^novalues/$', views.register, name='novalues'),
     # logout page
     url(r'^logout/$', views.logout, name='logout'),
     # members page
