@@ -82,16 +82,34 @@ def friends(request):
     following = member_obj.following.all()
     followers = Member.objects.filter(following__username=username)
     #HOW IN THE FLYING FUCK DOES THIS WORK
-    inceptionThree=Member.objects.filter(following__following__username=username).exclude(following=username).exclude(pk=username).distinct()
+    recommended=Member.objects.filter(following__following__username=username).exclude(following=username).exclude(pk=username).distinct()
     print(followers)
-    print(inceptionThree)
+    print(recommended)
     invitations = Invitation.objects.filter(to_user=username)
     # render response
+    if 'invite' in request.GET:
+        friend = request.GET['invite']
+        friend_obj = Member.objects.get(pk=friend)
+        # If they are already friends
+        if Member.objects.filter(username=username, following=friend).exists():
+            pass # do nothing as they are already friends
+        # If invitee has already sent a request to the user, make them friends
+        elif Invitation.objects.filter(to_user=username, from_user=friend).exists():
+            member_obj.following.add(friend_obj)
+            member_obj.save()
+            Invitation.objects.filter(to_user=member_obj, from_user=friend).delete()
+        # Not friends and no invitation exists
+        else:
+            print("not friends and invitation may or may not have already been sent")
+            print(friend)
+            print(friend_obj)#interesting to note that while the two print statement will display the same thing
+                            # only friend_obj can be passed to the database as its required to be an instance
+            Invitation.objects.update_or_create(to_user=friend_obj, from_user=member_obj, status='pending', defaults={'timestamp':timezone.now()})
     return render(request, 'social/friends.html', {
         'appname': appname,
         'username': username,
         'members': members,
-        'recommendations': inceptionThree,
+        'recommended': recommended,
         'invitations':invitations,
         'following': following,
         'followers': followers,
