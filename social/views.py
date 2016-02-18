@@ -5,7 +5,6 @@ from django.template import RequestContext, loader
 from social.models import Member, Profile, Message, Invitation
 
 appname = 'Facemagazine'
-
 # decorator that tests whether user is logged in
 def loggedin(f):
     def test(request):
@@ -60,9 +59,11 @@ def login(request):
         if p == member.password:
             request.session['username'] = u;
             request.session['password'] = p;
+            invitations = Invitation.objects.filter(to_user=u)
             return render(request, 'social/login.html', {
                 'appname': appname,
                 'username': u,
+                'invitations': invitations,
                 'loggedin': True}
                 )
         else:
@@ -77,17 +78,21 @@ def friends(request):
         friend_obj = Member.objects.get(pk=friend)
         member_obj.following.remove(friend_obj)
         member_obj.save()
-    # list of people I'm following
+    # list of people I'm friends with
     following = member_obj.following.all()
-    # list of people that are following me
     followers = Member.objects.filter(following__username=username)
-    print(following)
+    #HOW IN THE FLYING FUCK DOES THIS WORK
+    inception=Member.objects.filter(following__in=followers).exclude(username=followers)
     print(followers)
+    print(inception)
+    invitations = Invitation.objects.filter(to_user=username)
     # render response
     return render(request, 'social/friends.html', {
         'appname': appname,
         'username': username,
         'members': members,
+        'recommendations': inception,
+        'invitations':invitations,
         'following': following,
         'followers': followers,
         'loggedin': True}
@@ -120,10 +125,12 @@ def member(request, view_user):
         text = member.profile.text
     else:
         text = ""
+    invitations = Invitation.objects.filter(to_user=username)
     return render(request, 'social/member.html', {
         'appname': appname,
         'username': username,
         'view_user': view_user,
+        'invitations':invitations,
         'greeting': greeting,
         'profile': text,
         'loggedin': True}
@@ -162,15 +169,21 @@ def members(request):
         following = member_obj.following.all()
         # list of people that are following me
         followers = Member.objects.filter(following__username=username)
+        invitations = Invitation.objects.filter(to_user=username)
         # render response
         return render(request, 'social/members.html', {
             'appname': appname,
             'username': username,
             'members': members,
+            'invitations': invitations,
             'following': following,
             'followers': followers,
             'loggedin': True}
             )
+#@loggedin
+#def get_invitations_count(username):
+ #   return Invitation.objects.filter(to_user=username).count()
+
 @loggedin
 def invites(request):
     username = request.session['username']
@@ -196,9 +209,9 @@ def invites(request):
     else:
         # list of all other members
         members = Member.objects.exclude(pk=username)
-        # list of people I'm following
+        # get all invitations sent to me
         invitations = Invitation.objects.filter(to_user=username)
-        # get all invitations user has sent
+        # get all invitations i have sent
         sents = Invitation.objects.filter(from_user=username) #edited
         # render response
         return render(request, 'social/invites.html', {
@@ -229,9 +242,11 @@ def profile(request):
             text = member.profile.text
         else:
             text = ""
+    invitations = Invitation.objects.filter(to_user=u)
     return render(request, 'social/profile.html', {
         'appname': appname,
         'username': u,
+        'invitations':invitations,
         'text' : text,
         'loggedin': True}
         )
@@ -259,9 +274,11 @@ def messages(request):
     messages = Message.objects.filter(recip=recip)
     profile_obj = Member.objects.get(pk=view).profile
     profile = profile_obj.text if profile_obj else ""
+    invitations = Invitation.objects.filter(to_user=username)
     return render(request, 'social/messages.html', {
         'appname': appname,
         'username': username,
+        'invitations':invitations,
         'profile': profile,
         'view': view,
         'messages': messages,
