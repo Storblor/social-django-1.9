@@ -4,6 +4,7 @@ from django.http import HttpResponse, Http404
 from django.template import RequestContext, loader
 from social.models import Member, Profile, Message, Invitation
 import datetime as D
+#cbkjdsd
 
 appname = 'Facemagazine'
 # decorator that tests whether user is logged in
