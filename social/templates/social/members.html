@@ -1,15 +1,55 @@
 {% extends "social/base.html" %}
 
-{% block content %}
-<div class='main'>
-<h3>other Members</h3>
-<ul>
-{% for member in members %}
-	<li> <a href="?view={{ member.username }}"> {{ member.username }} </a>
 
-			[<a href="?invite={{ member.username }}">Add friend</a>] </li>
-{% endfor %}
-</ul>
-<br>
-</div>
+    <div class='main'>
+    <div class="container">
+  <div class="row">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4>
+            Other members
+          </h4>
+
+        </div>
+          {% block content %}
+
+              <br>
+            <div class="col-lg-6 col-md-offset-6">
+
+    <div class="input-group">
+      <input type="text" class="form-control" placeholder="Search for your friend here">
+      <span class="input-group-btn">
+        <button class="btn btn-default" type="button">
+            <span class="glyphicon glyphicon-off"></span>
+            Search
+            </button>
+      </span>
+    </div><!-- /input-group -->
+  </div>
+              <br><br> <br>
+
+        <table class="table table-fixed">
+
+          <tbody>
+          {% for member in members %}
+            <tr>
+
+              <td class="col-xs-2"> <a href="?view={{ member.username }}"> {{ member.username }} </a>
+              </td>
+                    <td class="col-xs-8"><td> <a href="?invite={{ member.username }}">Add friend</a>
+            </td>
+
+            </tr>
+
+             {% endfor %}
+
 {% endblock %}
+
+          </tbody>
+        </table>
+      </div>
+
+  </div>
+</div>
+    </div>
+

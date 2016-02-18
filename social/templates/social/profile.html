@@ -3,15 +3,15 @@
 {% block content %}
 <div class='main'>
 {% if text %}
-<h3>Your Profile</h3>
+<h3>Your Profile's status</h3>
 {{ text }} <br style='clear:left;'><br>
 {% endif %}
 <form method='POST' action='/social/profile/' enctype='multipart/form-data'>
   	{% csrf_token %}
-	<h3>Enter or edit your details and/or upload an image</h3>
-	<textarea name='text' cols='50' rows='3'>{{ text }}</textarea>
+	<h3>You can edit your status here: </h3>
+	<textarea class="form-control" rows="5" name='text' cols='40' rows='3'>{{ text }}</textarea>
 	<br>
-   <input type='submit' value='Save Profile'>
+   <button type="submit" class="btn btn-default"> Submit </button>
 </form>
 </div>
 {% endblock %}

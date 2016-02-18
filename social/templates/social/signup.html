@@ -3,22 +3,27 @@
 {% load staticfiles%}
 
 {% block content %}
-<span class='info'>&#8658; You must be logged in to view this page.</span>
+
 <script src="{% static 'social/jquery-1.11.2.js' %}"></script>
 <script src="{% static 'social/ajax.js' %}"></script>
-<br>
-<br>
-<div class='main'><h3>Please enter your details to sign up</h3>
+
+<h3>Please enter your details to sign up</h3>
 <form method='POST' action="/social/register/">
 	{% csrf_token %}
-   <span class='fieldname'>Username</span>
-   <input type='text' maxlength='16' id='user' name='user'>
-      <span id='info'></span>
-      <br>
-      <span class='fieldname'>Password</span>
-      <input type='text' maxlength='16' name='pass'><br>
-      <span class='fieldname'>&nbsp;</span>
-   <input type='submit' value='Sign up'>
-</form>
-</div>
+    <h4>Username</h4>
+    <div class='input-group'>
+        <span class='input-group-addon' id='basic-addon1'>@</span>
+         <input type='text' maxlength='16' class='form-control' id='user' name='user' placeholder='Username' onBlur='checkUser(this)' aria-describedby='basic-addon1' >
+            </div>
+
+     <div class='form-group'>
+            <h4>Password</h4>
+             <input type='password' maxlength='16' name='pass' class='form-control'  id='exampleInputPassword1' placeholder='Password'  maxlength='16' name='password'>
+             </div>
+
+            <label>
+              <input type='checkbox'> Remember me
+                   </label>
+                      <button type='submit' class='btn btn-default' value='Sign up'>Sign up</button>
+                    </form>
 {% endblock %}

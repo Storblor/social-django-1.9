@@ -4,9 +4,35 @@
 <div class='main'>
 <h3>{{ greeting }} Profile</h3>
 {% if profile %}
-{{ profile }} <br style='clear:left;'><br>
+    <div class="alert alert-success" role="alert">{{ profile }} </div>
+    {% load staticfiles %}
+    <img src="{% static "my_app/myexample.jpg" %}" alt="My image"/>
+
 {% endif %}
-<a class='button' href='/social/messages/?view={{ view_user }}'>View {{ greeting }} messages</a>
+
+    {% if messages %}
+   {% for message in messages %}
+   {% if message.pm or message.user.username = username or message.recip.username = username %}
+      {{ message.time }}:
+      <a href='/social/messages/?view={{message.user.username}}'>
+         {{message.user.username}}
+      </a>
+      {% if message.pm %}
+         wrote: "{{ message.text }}"
+      {% else %}
+         whispered: <span class='whisper'>"{{ message.text }}"</span>
+      {% endif %}
+      {% if view = username %}
+         [<a href='/social/messages/?view={{view}}&erase={{message.id}}'>erase</a>]
+      {% endif %}
+      <br>
+   {% endif %}
+   {% endfor %}
+{% else %}
+<br><span class='info'>No messages yet</span><br><br>
+{% endif %}
+</div>
+
 <br>
 <br>
 </div>
