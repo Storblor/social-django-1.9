@@ -4,7 +4,7 @@ class Profile(models.Model):
     text = models.CharField(max_length=4096)
 
 class Member(models.Model):
-    username = models.CharField(max_length=16,primary_key=True)
+    username = models.CharField(max_length=16, primary_key=True)
     password = models.CharField(max_length=16)
     profile = models.OneToOneField(Profile, null=True)
     following = models.ManyToManyField("self", symmetrical=True)
@@ -20,8 +20,8 @@ class Message(models.Model):
     text = models.CharField(max_length=4096)
 
 class Invitation(models.Model):
-    to_user = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='%(class)s_user')
-    from_user = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='%(class)s_recip')
+    to_user = models.ForeignKey(Member, related_name='%(class)s_user')
+    from_user = models.ForeignKey(Member, related_name='%(class)s_recip')
     timestamp = models.DateTimeField()
     status = models.CharField(max_length=10)
 
