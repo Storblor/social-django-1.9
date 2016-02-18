@@ -82,16 +82,16 @@ def friends(request):
     following = member_obj.following.all()
     followers = Member.objects.filter(following__username=username)
     #HOW IN THE FLYING FUCK DOES THIS WORK
-    inception=Member.objects.filter(following__in=followers).exclude(username=followers)
+    inceptionThree=Member.objects.filter(following__following__username=username).exclude(following=username).exclude(pk=username).distinct()
     print(followers)
-    print(inception)
+    print(inceptionThree)
     invitations = Invitation.objects.filter(to_user=username)
     # render response
     return render(request, 'social/friends.html', {
         'appname': appname,
         'username': username,
         'members': members,
-        'recommendations': inception,
+        'recommendations': inceptionThree,
         'invitations':invitations,
         'following': following,
         'followers': followers,
