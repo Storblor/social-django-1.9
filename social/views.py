@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.http import HttpResponse, Http404
 from django.template import RequestContext, loader
 from social.models import Member, Profile, Message, Invitation
+from difflib import SequenceMatcher
 import datetime as D
 #cbkjdsd
 
@@ -52,9 +53,7 @@ def register(request):
         })
     return HttpResponse(template.render(context))
 
-
 def login(request):
-
     if 'username' not in request.POST:
         template = loader.get_template('social/login.html')
         context = RequestContext(request, {
@@ -76,25 +75,16 @@ def login(request):
             request.session['username'] = u;
             request.session['password'] = p;
             response = HttpResponse('Hello World')
-            # now = D.datetime.utcnow()
-            # max_age = 7 * 24 * 60 * 60
-            # exp = now + D.timedelta(seconds=max_age)
-            # format("%a, %d-%b-%Y %H:%M:%S GMT")
-            # exp_str = D.datetime.strftime(exp, format)
-            # response.set_cookie('username', 'hannah',expires=exp_str)
-            # return response
-
             return render(request, 'social/login.html', {
                 'appname': appname,
                 'username': u,
                 'loggedin': True}
                 )
-
         else:
-         template = loader.get_template('social/wrongpass.html')
-         context = RequestContext(request, {
+            template = loader.get_template('social/wrongpass.html')
+            context = RequestContext(request, {
                'appname': appname,
-        })
+            })
         return HttpResponse(template.render(context))
 
 @loggedin
@@ -109,17 +99,15 @@ def friends(request):
     # list of people I'm friends with
     following = member_obj.following.all()
     followers = Member.objects.filter(following__username=username)
-    #HOW IN THE FLYING FUCK DOES THIS WORK
-    inceptionThree=Member.objects.filter(following__following__username=username).exclude(following=username).exclude(pk=username).distinct()
-    print(followers)
-    print(inceptionThree)
+    # get friends of friends of the user, then exclude their friends, them and finally remove duplicate items
+    recommendations=Member.objects.filter(following__following__username=username).exclude(following=username).exclude(pk=username).distinct()
     invitations = Invitation.objects.filter(to_user=username)
     # render response
     return render(request, 'social/friends.html', {
         'appname': appname,
         'username': username,
         'members': members,
-        'recommendations': inceptionThree,
+        'recommended': recommendations,
         'invitations':invitations,
         'following': following,
         'followers': followers,
@@ -186,6 +174,33 @@ def member(request, view_user):
 def members(request):
     username = request.session['username']
     member_obj = Member.objects.get(pk=username)
+    if 'search' in request.POST:
+        search_obj = request.POST['search']
+        members = Member.objects.all().exclude(pk=username)
+        lst = []
+        for person in members:
+            print('hello')
+            sm = SequenceMatcher(None, search_obj, person.__str__())
+            x = sm.ratio()
+            if x >= 0.7:
+                lst.append(Member.objects.get(pk=person))
+                print(lst)
+        # list of people I'm following
+        following = member_obj.following.all()
+        # list of people that are following me
+        followers = Member.objects.filter(following__username=username)
+        invitations = Invitation.objects.filter(to_user=username)
+                # render response
+        return render(request, 'social/members.html', {
+            'appname': appname,
+            'username': username,
+            'query': search_obj,
+            'invitations': invitations,
+            'following': following,
+            'followers': followers,
+            'results': lst,
+            'loggedin': True}
+            )
     # send a friend request
     if 'invite' in request.GET:
         friend = request.GET['invite']
@@ -226,9 +241,6 @@ def members(request):
             'followers': followers,
             'loggedin': True}
             )
-#@loggedin
-#def get_invitations_count(username):
- #   return Invitation.objects.filter(to_user=username).count()
 
 @loggedin
 def invites(request):
@@ -244,6 +256,7 @@ def invites(request):
         friend_obj = Member.objects.get(pk=friend)
         member_obj.following.add(friend_obj)
         member_obj.save()
+    # once we have accepted the friend request we no longer have need of the original invitation, so we delete from the database
         Invitation.objects.filter(to_user=member_obj, from_user=friend).delete()
     # decline friend invitation
     if 'decline' in request.GET:
@@ -257,14 +270,11 @@ def invites(request):
         members = Member.objects.exclude(pk=username)
         # get all invitations sent to me
         invitations = Invitation.objects.filter(to_user=username)
-        # get all invitations i have sent
-        sents = Invitation.objects.filter(from_user=username) #edited
         # render response
         return render(request, 'social/invites.html', {
             'appname': appname,
             'username': username,
             'invites': members,
-            'sents': sents, #edited
             'invitations': invitations,
             'loggedin': True}
             )
