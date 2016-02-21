@@ -43,14 +43,22 @@
                     </form>
               </div>
               <br><br> <br>
-              <table class="table table-fixed">
+              <table class="table table-reflow">
               <tbody>
               {% if members %}
                {% for member in members %} 
-                <tr> 
+                   <tr>
+                   {% if member in followers %}
+                    <tr> 
                     <td class="col-xs-2"> <a href="?view={{ member.username }}"> {{ member.username }} </a></td> 
-                    <td class="col-xs-8"><td> <a href="?invite={{ member.username }}">Add friend</a></td> 
-                </tr>
+                    <td class="col-xs-8"><td></td>
+                    </tr>
+                    {% else %}
+                       <tr>
+                            <td class="col-xs-2"> <a href="?view={{ member.username }}"> {{ member.username }} </a></td>
+                            <td class="col-xs-8"><td> <a href="?invite={{ member.username }}"> Add friend</a></td>
+                       </tr>
+                   {% endif %}
               {% endfor %}
               {% else %}
                     {% for member in results %}
