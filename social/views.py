@@ -4,6 +4,8 @@ from django.http import HttpResponse, Http404
 from django.template import RequestContext, loader
 from social.models import Member, Profile, Message, Invitation
 from difflib import SequenceMatcher
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import PBKDF2PasswordHasher
 import datetime as D
 #cbkjdsd
 
@@ -36,15 +38,18 @@ def signup(request):
 def register(request):
     u = request.POST['user']
     p = request.POST['pass']
+
     template = loader.get_template('social/novalues.html')
     context = RequestContext(request, {
                 'appname': appname
                     })
 
-    if p=="" or u=="" or (" " in p)==True :
+    if p=="" or u=="" or (" " in p) or (" " in u) or ('^[A-Za-z0-9_-]+$' in u)==True :
         return HttpResponse(template.render(context))
     else:
-     user = Member(username=u, password=p)
+     hasher = PBKDF2PasswordHasher() #using PBKDF2 algorithm to hash
+     hashedp = hasher.encode(password= p, salt='salt', iterations = 50000) #hashing password
+     user = Member(username=u, password=hashedp)
      user.save()
     template = loader.get_template('social/user-registered.html')
     context = RequestContext(request, {
@@ -63,15 +68,19 @@ def login(request):
     else:
         u = request.POST['username']
         p = request.POST['password']
+        hasher = PBKDF2PasswordHasher() #using PBKDF2 algorithm to hash
+        hashedp = hasher.encode(password= p, salt='salt', iterations = 50000) #hashing login password
         template = loader.get_template('social/user-doesnt-exist.html')
         context = RequestContext(request, {
                 'appname': appname,
             })
         try:
             member = Member.objects.get(pk=u)
+            print(member.password)
         except Member.DoesNotExist:
             return HttpResponse(template.render(context))
-        if p == member.password:
+        if hashedp == member.password:
+            print("right")
             request.session['username'] = u;
             request.session['password'] = p;
             response = HttpResponse('Hello World')
