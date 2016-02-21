@@ -279,12 +279,14 @@ def invites(request):
         members = Member.objects.exclude(pk=username)
         # get all invitations sent to me
         invitations = Invitation.objects.filter(to_user=username)
+        invitations_sent = Invitation.objects.filter(from_user=username)
         # render response
         return render(request, 'social/invites.html', {
             'appname': appname,
             'username': username,
             'invites': members,
             'invitations': invitations,
+            'invitations_sent': invitations_sent,
             'loggedin': True}
             )
 
