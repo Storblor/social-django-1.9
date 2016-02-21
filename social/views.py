@@ -3,6 +3,9 @@ from django.utils import timezone
 from django.http import HttpResponse, Http404
 from django.template import RequestContext, loader
 from social.models import Member, Profile, Message, Invitation
+from difflib import SequenceMatcher
+import datetime as D
+#cbkjdsd
 
 appname = 'Facemagazine'
 # decorator that tests whether user is logged in
@@ -33,9 +36,17 @@ def signup(request):
 def register(request):
     u = request.POST['user']
     p = request.POST['pass']
-    user = Member(username=u, password=p)
-    user.save()
-    template = loader.get_template('social/user-registered.html')    
+    template = loader.get_template('social/novalues.html')
+    context = RequestContext(request, {
+                'appname': appname
+                    })
+
+    if p=="" or u=="" or (" " in p)==True :
+        return HttpResponse(template.render(context))
+    else:
+     user = Member(username=u, password=p)
+     user.save()
+    template = loader.get_template('social/user-registered.html')
     context = RequestContext(request, {
         'appname': appname,
         'username' : u
@@ -52,22 +63,29 @@ def login(request):
     else:
         u = request.POST['username']
         p = request.POST['password']
+        template = loader.get_template('social/user-doesnt-exist.html')
+        context = RequestContext(request, {
+                'appname': appname,
+            })
         try:
             member = Member.objects.get(pk=u)
         except Member.DoesNotExist:
-            raise Http404("User does not exist")
+            return HttpResponse(template.render(context))
         if p == member.password:
             request.session['username'] = u;
             request.session['password'] = p;
-            invitations = Invitation.objects.filter(to_user=u)
+            response = HttpResponse('Hello World')
             return render(request, 'social/login.html', {
                 'appname': appname,
                 'username': u,
-                'invitations': invitations,
                 'loggedin': True}
                 )
         else:
-            return HttpResponse("Wrong password") 
+            template = loader.get_template('social/wrongpass.html')
+            context = RequestContext(request, {
+               'appname': appname,
+            })
+        return HttpResponse(template.render(context))
 
 @loggedin
 def friends(request):
@@ -81,35 +99,15 @@ def friends(request):
     # list of people I'm friends with
     following = member_obj.following.all()
     followers = Member.objects.filter(following__username=username)
-    #HOW IN THE FLYING FUCK DOES THIS WORK
-    recommended = Member.objects.filter(following__following__username=username).exclude(following=username).exclude(pk=username).distinct()
-    print(followers)
-    print(recommended)
+    # get friends of friends of the user, then exclude their friends, them and finally remove duplicate items
+    recommendations=Member.objects.filter(following__following__username=username).exclude(following=username).exclude(pk=username).distinct()
     invitations = Invitation.objects.filter(to_user=username)
     # render response
-    if 'invite' in request.GET:
-        friend = request.GET['invite']
-        friend_obj = Member.objects.get(pk=friend)
-        # If they are already friends
-        if Member.objects.filter(username=username, following=friend).exists():
-            pass # do nothing as they are already friends
-        # If invitee has already sent a request to the user, make them friends
-        elif Invitation.objects.filter(to_user=username, from_user=friend).exists():
-            member_obj.following.add(friend_obj)
-            member_obj.save()
-            Invitation.objects.filter(to_user=member_obj, from_user=friend).delete()
-        # Not friends and no invitation exists
-        else:
-            print("not friends and invitation may or may not have already been sent")
-            print(friend)
-            print(friend_obj)#interesting to note that while the two print statement will display the same thing
-                            # only friend_obj can be passed to the database as its required to be an instance
-            Invitation.objects.update_or_create(to_user=friend_obj, from_user=member_obj, status='pending', defaults={'timestamp':timezone.now()})
     return render(request, 'social/friends.html', {
         'appname': appname,
         'username': username,
         'members': members,
-        'recommended': recommended,
+        'recommended': recommendations,
         'invitations':invitations,
         'following': following,
         'followers': followers,
@@ -133,7 +131,24 @@ def logout(request):
 def member(request, view_user):
     username = request.session['username']
     member = Member.objects.get(pk=view_user)
-    print(member)
+    if 'view' in request.GET:
+        view = request.GET['view']
+    else:
+        view = username
+    recip = Member.objects.get(pk=view)
+    # If message was deleted
+    if 'erase' in request.GET:
+        msg_id = request.GET['erase']
+        Message.objects.get(id=msg_id).delete()
+    # If text was posted then save on DB
+    if 'text' in request.POST:
+        text = request.POST['text']
+        pm = request.POST['pm'] == "0"
+        message = Message(user=username,recip=recip,pm=pm,time=timezone.now(),text=text)
+        message.save()
+    messages = Message.objects.filter(recip=recip)
+    profile_obj = Member.objects.get(pk=view).profile
+    profile = profile_obj.text if profile_obj else ""
     if view_user == username:
         greeting = "Your"
     else:
@@ -148,6 +163,7 @@ def member(request, view_user):
         'appname': appname,
         'username': username,
         'view_user': view_user,
+        'messages': messages,
         'invitations':invitations,
         'greeting': greeting,
         'profile': text,
@@ -158,6 +174,33 @@ def member(request, view_user):
 def members(request):
     username = request.session['username']
     member_obj = Member.objects.get(pk=username)
+    if 'search' in request.POST:
+        search_obj = request.POST['search']
+        members = Member.objects.all().exclude(pk=username)
+        lst = []
+        for person in members:
+            print('hello')
+            sm = SequenceMatcher(None, search_obj, person.__str__())
+            x = sm.ratio()
+            if x >= 0.7:
+                lst.append(Member.objects.get(pk=person))
+                print(lst)
+        # list of people I'm following
+        following = member_obj.following.all()
+        # list of people that are following me
+        followers = Member.objects.filter(following__username=username)
+        invitations = Invitation.objects.filter(to_user=username)
+                # render response
+        return render(request, 'social/members.html', {
+            'appname': appname,
+            'username': username,
+            'query': search_obj,
+            'invitations': invitations,
+            'following': following,
+            'followers': followers,
+            'results': lst,
+            'loggedin': True}
+            )
     # send a friend request
     if 'invite' in request.GET:
         friend = request.GET['invite']
@@ -198,9 +241,6 @@ def members(request):
             'followers': followers,
             'loggedin': True}
             )
-#@loggedin
-#def get_invitations_count(username):
- #   return Invitation.objects.filter(to_user=username).count()
 
 @loggedin
 def invites(request):
@@ -216,6 +256,7 @@ def invites(request):
         friend_obj = Member.objects.get(pk=friend)
         member_obj.following.add(friend_obj)
         member_obj.save()
+    # once we have accepted the friend request we no longer have need of the original invitation, so we delete from the database
         Invitation.objects.filter(to_user=member_obj, from_user=friend).delete()
     # decline friend invitation
     if 'decline' in request.GET:
@@ -229,14 +270,11 @@ def invites(request):
         members = Member.objects.exclude(pk=username)
         # get all invitations sent to me
         invitations = Invitation.objects.filter(to_user=username)
-        # get all invitations i have sent
-        sents = Invitation.objects.filter(from_user=username) #edited
         # render response
         return render(request, 'social/invites.html', {
             'appname': appname,
             'username': username,
             'invites': members,
-            'sents': sents, #edited
             'invitations': invitations,
             'loggedin': True}
             )
