@@ -88,18 +88,18 @@ function ajaxRequest()
 function validateForm() {
   var x = document.forms["signupForm"]["user"].value;
   var p = document.forms["signupForm"]["pass"].value;
-  var ck_name = /^[A-Za-z0-9_-]{3,20}$/; //username validation supports alphanumeric characters and no special characters except underscore 3-20 chars
-  var ck_password = /^[A-Za-z0-9!@#$%^&*()_]{6,20}$/; //password validation supports special characters 6-20 chars
+  var ck_name = /^[A-Za-z0-9_-]{3,16}$/; //username validation supports alphanumeric characters and no special characters except underscore 3-16 chars
+  var ck_password = /^[A-Za-z0-9!@#$%^&*()_]{6,16}$/; //password validation supports special characters 6-16 chars
     if (x == null || x == "" || p == null || p == "") {
         alert("Name or Password must be filled out");
         return false;
     }
   if (!ck_name.test(x)){
-                alert("Invalid Username (Username must be alphanumeric and between 3-20 characters.");
+                alert("Invalid Username (Username must be alphanumeric and between 3-16 characters.");
                 return false
             }
   else if(!ck_password.test(p)){
-                alert("Invalid Password (Password must be between 6-20 characters.)");
+                alert("Invalid Password (Password must be between 6-16 characters.)");
                 return false
   }
 
