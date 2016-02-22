@@ -43,37 +43,39 @@
                     </form>
               </div>
               <br><br> <br>
-              <table class="table table-reflow">
+              <table class="table table-responsive">
               <tbody>
               {% if members %}
                {% for member in members %} 
                    <tr>
                    {% if member in followers %}
                     <tr> 
-                    <td class="col-xs-2"> <a href="?view={{ member.username }}"> {{ member.username }} </a></td> 
-                    <td class="col-xs-8"><td></td>
+                    <td align="left"> <a href="?view={{ member.username }}"> {{ member.username }} </a></td> 
+                    <td><td></td>
                     </tr>
                     {% else %}
                        <tr>
-                            <td class="col-xs-2"> <a href="?view={{ member.username }}"> {{ member.username }} </a></td>
-                            <td class="col-xs-8"><td> <a href="?invite={{ member.username }}"> Add friend</a></td>
+                            <td align="left" > <a href="?view={{ member.username }}"> {{ member.username }} </a></td>
+                            <td align="right"><td align="right"> <a href="?invite={{ member.username }}"> Add friend</a></td>
                        </tr>
                    {% endif %}
               {% endfor %}
               {% else %}
                     {% for member in results %}
                         <tr>
-                            <td class="col-xs-2"> <a href="?view={{ member.username }}"> {{ member.username }} </a></td>
-                            <td class="col-xs-8"><td> <a href="?invite={{ member.username }}">Add friend</a></td>
+                            <td align="left"> <a href="?view={{ member.username }}"> {{ member.username }} </a></td>
+                            <td><td align="right"> <a href="?invite={{ member.username }}">Add friend</a></td>
                         </tr>
                     {% empty %}
                         <li>Your search, '{{query}}' did not match any known members</li>
                     {% endfor %}
               {% endif %}
-          {% endblock %}
+
 
           </tbody>
         </table>
+
+      {% endblock %}
       </div>
   </div>
 </div>

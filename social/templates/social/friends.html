@@ -16,7 +16,7 @@
 	<ul>
 	{% for member in recommended %}
 		<li> <a href="/social/members/?view={{ member.username }}"> {{ member.username }} </a>
-        [<a href="?invite={{ member.username }}">Add friend</a>] </li>
+        [<a href="/social/friends/?invite={{ member.username }}">Add friend</a>] </li>
 
 	{% endfor %}
 	</ul>
