@@ -40,10 +40,19 @@ def register(request):
     u = request.POST['user']
     p = request.POST['pass']
 
-    hasher = PBKDF2PasswordHasher() #using PBKDF2 algorithm to hash
-    hashedp = hasher.encode(password= p, salt='salt', iterations = 50000) #hashing password
-    user = Member(username=u, password=hashedp)
-    user.save()
+    template = loader.get_template('social/username_taken.html')
+    context = RequestContext(request, {
+                'appname': appname
+                    })
+
+    if Member.objects.filter(pk=u).exists() :
+        return HttpResponse(template.render(context))
+
+    else:
+        hasher = PBKDF2PasswordHasher() #using PBKDF2 algorithm to hash
+        hashedp = hasher.encode(password= p, salt='salt', iterations = 50000) #hashing password
+        user = Member(username=u, password=hashedp)
+        user.save()
 
     template = loader.get_template('social/user-registered.html')
     context = RequestContext(request, {
