@@ -6,6 +6,7 @@ from social.models import Member, Profile, Message, Invitation
 from difflib import SequenceMatcher
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import PBKDF2PasswordHasher
+import re
 import datetime as D
 #cbkjdsd
 
@@ -39,23 +40,16 @@ def register(request):
     u = request.POST['user']
     p = request.POST['pass']
 
-    template = loader.get_template('social/novalues.html')
-    context = RequestContext(request, {
-                'appname': appname
-                    })
+    hasher = PBKDF2PasswordHasher() #using PBKDF2 algorithm to hash
+    hashedp = hasher.encode(password= p, salt='salt', iterations = 50000) #hashing password
+    user = Member(username=u, password=hashedp)
+    user.save()
 
-    if p=="" or u=="" or (" " in p) or (" " in u) or ('^[A-Za-z0-9_-]+$' in u)==True :
-        return HttpResponse(template.render(context))
-    else:
-     hasher = PBKDF2PasswordHasher() #using PBKDF2 algorithm to hash
-     hashedp = hasher.encode(password= p, salt='salt', iterations = 50000) #hashing password
-     user = Member(username=u, password=hashedp)
-     user.save()
     template = loader.get_template('social/user-registered.html')
     context = RequestContext(request, {
         'appname': appname,
         'username' : u
-        })
+     })
     return HttpResponse(template.render(context))
 
 def login(request):

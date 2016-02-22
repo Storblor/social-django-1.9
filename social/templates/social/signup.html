@@ -6,9 +6,9 @@
 
 <script src="{% static 'social/jquery-1.11.2.js' %}"></script>
 <script src="{% static 'social/ajax.js' %}"></script>
-
+<script src="{% static 'social/scripts.js' %}"></script>
 <h3>Please enter your details to sign up</h3>
-<form method='POST' action="/social/register/">
+<form name ="signupForm" method='POST' action="/social/register/" onsubmit="return validateForm()">
 	{% csrf_token %}
     <h4>Username</h4>
     <div class='input-group'>
