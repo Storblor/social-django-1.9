@@ -95,7 +95,7 @@ function validateForm() {
         return false;
     }
   if (!ck_name.test(x)){
-                alert("Invalid Username (Username must be alphanumeric and between 3-16 characters.");
+                alert("Invalid Username (Username must be alphanumeric and between 3-16 characters.)");
                 return false
             }
   else if(!ck_password.test(p)){
