@@ -119,10 +119,6 @@ def friends(request):
             Invitation.objects.filter(to_user=member_obj, from_user=friend).delete()
         # Not friends and no invitation exists
         else:
-            print("not friends and invitation may or may not have already been sent")
-            print(friend)
-            print(friend_obj)#interesting to note that while the two print statement will display the same thing
-                            # only friend_obj can be passed to the database as its required to be an instance
             Invitation.objects.update_or_create(to_user=friend_obj, from_user=member_obj, status='pending', defaults={'timestamp':timezone.now()})
     if 'unfriend' in request.GET:
         friend = request.GET['unfriend']
