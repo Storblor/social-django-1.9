@@ -1,83 +1,70 @@
 {% extends "social/base.html" %}
-
-
-    <div class='main'>
+  <div class='main'>
     <div class="container">
-  <div class="row">
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <h4>
-            Other members
-          </h4>
-
-        </div>
+    <div class="row">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <p>
+              Other members
+            </p>
+          </div>
           {% block content %}
-
-              <br>
-              <!--
-           <div class="col-lg-6 col-md-offset-6">
-
-    <div class="input-group">
-      <input type="text" class="form-control" placeholder="Search for your friend here">
-      <span class="input-group-btn">
-        <button class="btn btn-default" type="button">
-            <span class="glyphicon glyphicon-off"></span>
-            Search
-            </button>
-      </span>
-    </div><
-  </div> -->
-<!-- my attempt at understanding elements of bootstrap and csrf after 10 minutes -->
-              <div class="col-lg-6 col-md-offset-6">
-                    <form method='post' class="form-inline" action='/social/members/?search={{ form.search.value }}'>
-                        <div class="input-group">
-                        {% csrf_token %}
-                        <input id ="field_data" name ="search" type="text" class="form-control" placeholder="Search members here">
-                        <span class="input-group-btn">
-                            <button type="submit" class="btn btn-default">
-                                <span class="glyphicon glyphicon-off"></span>
-                                Search
-                            </button>
-                        </span>
-                        </div>
-                    </form>
-              </div>
-              <br><br> <br>
-              <table class="table table-responsive">
+            <br>
+            <div class="col-lg-6 col-md-offset-6">
+              <form method='post' class="form-inline" action='/social/members/?search={{ form.search.value }}'>
+                <div class="input-group">
+                  {% csrf_token %}
+                  <input id ="field_data" name ="search" type="text" class="form-control" placeholder="Search members here">
+                  <span class="input-group-btn">
+                    <button type="submit" class="btn btn-default">
+                      <span class="glyphicon glyphicon-search"></span>
+                      Search
+                    </button>
+                  </span>
+                </div>
+              </form>
+            </div>
+            <br><br> <br>
+            <table class="table table-fixed">
               <tbody>
               {% if members %}
-               {% for member in members %} 
-                   <tr>
-                   {% if member in followers %}
-                    <tr> 
-                    <td align="left"> <a href="?view={{ member.username }}"> {{ member.username }} </a></td> 
-                    <td><td></td>
-                    </tr>
+                {% for member in members %} 
+                    {% if member in followers %}
+                      <tr>
+                        <td class="col-xs-2" align="left"> <a href="?view={{ member.username }}"> {{ member.username }} </a></td>
+                        <td class="col-xs-8"><td> Friend</td>
+                      </tr>
                     {% else %}
-                       <tr>
-                            <td align="left" > <a href="?view={{ member.username }}"> {{ member.username }} </a></td>
-                            <td align="right"><td align="right"> <a href="?invite={{ member.username }}"> Add friend</a></td>
-                       </tr>
-                   {% endif %}
-              {% endfor %}
+                      <tr>
+                        <td class="col-xs-2" align="left"> <a href="?view={{ member.username }}"> {{ member.username }} </a></td>
+                        <td class="col-xs-8"><td><a href="?invite={{ member.username }}"> add friend</a></td>
+                      </tr>
+                    {% endif %}
+                  </tr>
+                {% endfor %}
               {% else %}
-                    {% for member in results %}
-                        <tr>
-                            <td align="left"> <a href="?view={{ member.username }}"> {{ member.username }} </a></td>
-                            <td><td align="right"> <a href="?invite={{ member.username }}">Add friend</a></td>
-                        </tr>
-                    {% empty %}
-                        <li>Your search, '{{query}}' did not match any known members</li>
-                    {% endfor %}
+                {% for member in results %}
+                  {% if member in followers %}
+                    <tr>
+                      <td class="col-xs-2" align="left"> <a href="?view={{ member.username }}"> {{ member.username }} </a></td>
+                      <td class="col-xs-8"> <td>Friend</td>
+                   </tr>
+                  {% else %}
+                    <tr>
+                      <td class="col-xs-2" align="left"> <a href="?view={{ member.username }}"> {{ member.username }} </a></td>
+                      <td class="col-xs-8"><td><a href="?invite={{ member.username }}"> add friend</a></td>
+                    </tr>
+                  {% endif %}
+                {% empty %}
+                  <li>Your search, '{{query}}' did not match any known members</li>
+                {% endfor %}
               {% endif %}
-
-
-          </tbody>
-        </table>
-
-      {% endblock %}
-      </div>
-  </div>
-</div>
+              </tbody>
+            </table>
+          {% endblock %}
+        </div>
     </div>
+    </div>
+    </div>
+</div>
 

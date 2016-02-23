@@ -87,8 +87,10 @@ def login(request):
             request.session['username'] = u;
             request.session['password'] = p;
             response = HttpResponse('Hello World')
+            invitations = Invitation.objects.filter(to_user=u)
             return render(request, 'social/login.html', {
                 'appname': appname,
+                'invitations':invitations,
                 'username': u,
                 'loggedin': True}
                 )
@@ -261,6 +263,7 @@ def members(request):
         following = member_obj.following.all()
         # list of people that are following me
         followers = Member.objects.filter(following__username=username)
+        print(members)
         invitations = Invitation.objects.filter(to_user=username)
         # render response
         return render(request, 'social/members.html', {
