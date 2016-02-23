@@ -94,11 +94,11 @@ function validateForm() {
         alert("Name or Password must be filled out");
         return false;
     }
-  if (!ck_name.test(x)){
+  if (!ck_name.test(x)){ // if username includes anything not stated in ck_name then alert
                 alert("Invalid Username (Username must be alphanumeric and between 3-16 characters.)");
                 return false
             }
-  else if(!ck_password.test(p)){
+  else if(!ck_password.test(p)){ // if password includes anything not stated in ck_password then alert
                 alert("Invalid Password (Password must be between 6-16 characters.)");
                 return false
   }

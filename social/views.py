@@ -45,7 +45,7 @@ def register(request):
                 'appname': appname
                     })
 
-    if Member.objects.filter(pk=u).exists() :
+    if Member.objects.filter(pk=u).exists() : # if the username exists then go the the username taken page
         return HttpResponse(template.render(context))
 
     else:
