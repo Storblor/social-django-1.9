@@ -126,6 +126,7 @@ def friends(request):
         member_obj.following.remove(friend_obj)
         member_obj.save()
     # list of people I'm friends with
+    # get all people friends with me
     following = member_obj.following.all()
     followers = Member.objects.filter(following__username=username)
     # get friends of friends of the user, then exclude their friends, them and finally remove duplicate items
